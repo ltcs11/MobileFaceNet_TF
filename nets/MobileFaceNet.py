@@ -298,7 +298,7 @@ def mobilenet_v2_arg_scope(is_training=True,
   }
 
   # Set weight_decay for weights in Conv and InvResBlock layers.
-  #weights_init = tf.truncated_normal_initializer(stddev=stddev)
+  # weights_init = tf.truncated_normal_initializer(stddev=stddev)
   weights_init = tf.contrib.layers.xavier_initializer(uniform=False)
   regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
   if regularize_depthwise:
