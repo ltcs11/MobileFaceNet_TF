@@ -24,35 +24,35 @@ import os
 
 slim = tf.contrib.slim
 
+
+
 def get_parser():
     parser = argparse.ArgumentParser(description='parameters to train net')
-    parser.add_argument('--max_epoch', default=10, help='epoch to train the network')
+    parser.add_argument('--max_epoch', default=9, help='epoch to train the network')
     parser.add_argument('--image_size', default=[112, 112], help='the image size')
-    parser.add_argument('--num_output', default=85164, help='the train images number')
-    parser.add_argument('--embedding_size', type=int,
-                        help='Dimensionality of the embedding.', default=128)
+    parser.add_argument('--num_output', default=85164, help='the train class number of all images')
+    parser.add_argument('--embedding_size', type=int, help='Dimensionality of the embedding.', default=128)
     parser.add_argument('--weight_decay', default=5e-5, help='L2 weight regularization.')
-    parser.add_argument('--lr_schedule', help='Number of epochs for learning rate piecewise.', default=[1, 4, 6, 8])
-    parser.add_argument('--train_batch_size', default=90, help='batch size to train network')
+    parser.add_argument('--lr_schedule', help='Number of epochs for learning rate piecewise.', default=[1, 3, 5, 7])
+    parser.add_argument('--train_batch_size', default=64, help='batch size to train network')
     parser.add_argument('--test_batch_size', type=int,
-                        help='Number of images to process in a batch in the test set.', default=100)
-    parser.add_argument('--eval_datasets', default=['lfw', 'cfp_ff', 'cfp_fp', 'agedb_30'], help='evluation datasets')
-    # parser.add_argument('--eval_datasets', default=['lfw'], help='evluation datasets')
+                        help='Number of images to process in a batch in the test set.', default=64)
+    # parser.add_argument('--eval_datasets', default=['lfw', 'cfp_ff', 'cfp_fp', 'agedb_30'], help='evluation datasets')
+    parser.add_argument('--eval_datasets', default=['lfw'], help='evluation datasets')
     parser.add_argument('--eval_db_path', default='./datasets/faces_ms1m_112x112', help='evluate datasets base path')
-    parser.add_argument('--eval_nrof_folds', type=int,
-                        help='Number of folds to use for cross validation. Mainly used for testing.', default=10)
+    parser.add_argument('--eval_nrof_folds', type=int, help='Number of folds to use for cross validation. Mainly used for testing.', default=10)
     parser.add_argument('--tfrecords_file_path', default='./datasets/faces_ms1m_112x112/tfrecords', type=str,
                         help='path to the output of tfrecords file path')
     parser.add_argument('--summary_path', default='./output/summary', help='the summary file save path')
     parser.add_argument('--ckpt_path', default='./output/ckpt', help='the ckpt file save path')
     parser.add_argument('--ckpt_best_path', default='./output/ckpt_best', help='the best ckpt file save path')
     parser.add_argument('--log_file_path', default='./output/logs', help='the ckpt file save path')
-    parser.add_argument('--saver_maxkeep', default=50, help='tf.train.Saver max keep ckpt files')
-    parser.add_argument('--buffer_size', default=10000, help='tf dataset api buffer size')
-    parser.add_argument('--summary_interval', default=400, help='interval to save summary')
-    parser.add_argument('--ckpt_interval', default=2000, help='intervals to save ckpt file')
-    parser.add_argument('--validate_interval', default=2000, help='intervals to save ckpt file')
-    parser.add_argument('--show_info_interval', default=20, help='intervals to save ckpt file')
+    parser.add_argument('--saver_maxkeep', default=10, help='tf.train.Saver max keep ckpt files')
+    parser.add_argument('--buffer_size', default=640, help='tf dataset api buffer size')
+    parser.add_argument('--summary_interval', default=100, help='interval to save summary')
+    parser.add_argument('--ckpt_interval', default=5000, help='intervals to save ckpt file')
+    parser.add_argument('--validate_interval', default=5000, help='intervals to run validate')
+    parser.add_argument('--show_info_interval', default=100, help='intervals to show current loss and running speed')
     parser.add_argument('--pretrained_model', type=str, default='', help='Load a pretrained model before training starts.')
     parser.add_argument('--optimizer', type=str, choices=['ADAGRAD', 'ADADELTA', 'ADAM', 'RMSPROP', 'MOM'],
                         help='The optimization algorithm to use', default='ADAM')
@@ -91,6 +91,7 @@ if __name__ == '__main__':
         # prepare train dataset
         # the image is substracted 127.5 and multiplied 1/128.
         # random flip left right
+
         tfrecords_f = os.path.join(args.tfrecords_file_path, 'tran.tfrecords')
         dataset = tf.data.TFRecordDataset(tfrecords_f)
         dataset = dataset.map(parse_function)
@@ -142,7 +143,7 @@ if __name__ == '__main__':
         total_loss = tf.add_n([inference_loss] + regularization_losses, name='total_loss')
 
         # define the learning rate schedule
-        learning_rate = tf.train.piecewise_constant(epoch, boundaries=args.lr_schedule, values=[0.1, 0.01, 0.001, 0.0001, 0.00001],
+        learning_rate = tf.train.piecewise_constant(epoch, boundaries=args.lr_schedule, values=[0.1, 0.05, 0.02, 0.01, 0.005],
                                          name='lr_schedule')
         
         # define sess
@@ -264,6 +265,7 @@ if __name__ == '__main__':
 
                             with open(os.path.join(log_dir, '{}_result.txt'.format(ver_name_list[ver_step])), 'at') as f:
                                 f.write('%d\t%.5f\t%.5f\n' % (count, np.mean(accuracy), val))
+                                f.write('%d\t%1.3f\t%1.3f\n' % (i, np.mean(fpr, 0), np.mean(tpr, 0)))
 
                             if ver_name_list == 'lfw' and np.mean(accuracy) > 0.992:
                                 print('best accuracy is %.5f' % np.mean(accuracy))
