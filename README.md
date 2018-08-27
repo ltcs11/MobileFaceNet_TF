@@ -2,18 +2,18 @@
 
 Tensorflow implementation for MobileFaceNet.
 
-## env
+## dependencies
 
-- tensorflow >= 1.5
+- tensorflow >= r1.5
 - opencv-python 3.x
-- python 3.x(3.6)
+- python 3.x
 - scipy
 - sklearn
 - numpy
 - mxnet
 - pickle
 
-## dataset
+## Prepare dataset
 
 1. choose one of The following links to download dataset which is provide by insightface. (Special Recommend MS1M)
 * [Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)
@@ -30,9 +30,9 @@ Tensorflow implementation for MobileFaceNet.
 
 ## performance
 
-|  size  | LFW(%) | Val@1e-3(%) |
-| ------ | ------ | ----------- | 
-|  4.8M  | 97+    |    85+      |
+|  size  | LFW(%) | Val@1e-3(%) | inference@MSM8976(ms) |
+| ------ | ------ | ----------- | --------------------- |
+|  5.7M  | 99.25+ |    96.8+    |          260-         |
 
 ## References
 
